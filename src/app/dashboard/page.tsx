@@ -16,6 +16,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const company = searchParams.get("company") || "Target Company";
+  const category = searchParams.get("category") || "General Industry";
   
   const [progress, setProgress] = useState(0);
   const [activeAgent, setActiveAgent] = useState(0);
@@ -36,7 +37,7 @@ function DashboardContent() {
       else {
         clearInterval(interval);
         setTimeout(() => {
-          router.push(`/report?company=${encodeURIComponent(company)}`);
+          router.push(`/report?company=${encodeURIComponent(company)}&category=${encodeURIComponent(category)}`);
         }, 1000);
       }
 

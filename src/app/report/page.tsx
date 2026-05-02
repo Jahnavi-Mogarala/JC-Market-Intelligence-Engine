@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -11,39 +11,66 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell 
 } from "recharts";
 
-const MOCK_DATA = {
-  score: 94,
-  threatIndex: "CRITICAL",
-  swot: {
-    S: ["Market leader in API developer experience", "Massive ecosystem integrations", "High switching costs for enterprise"],
-    W: ["Complex pricing structure at scale", "Slower feature velocity in core processing", "Heavy reliance on partner networks"],
-    O: ["Global expansion in emerging markets", "AI-driven fraud prevention upselling", "B2B SaaS embedded finance"],
-    T: ["Aggressive pricing from newer entrants", "Increasing regulatory scrutiny", "Consolidation of payment aggregators"]
-  },
-  competitors: [
-    { name: "Adyen", threat: 85, marketShare: 20 },
-    { name: "PayPal", threat: 60, marketShare: 45 },
-    { name: "Braintree", threat: 70, marketShare: 15 },
-    { name: "Checkout", threat: 80, marketShare: 10 },
-  ],
-  contacts: [
-    { name: "Sarah Jenkins", role: "VP of Product Strategy", type: "Decision Maker" },
-    { name: "Michael Chang", role: "Head of Engineering", type: "Influencer" },
-    { name: "Elena Rostova", role: "Chief Revenue Officer", type: "Economic Buyer" },
-  ]
+const generateDynamicData = (company: string, category: string) => {
+  const hash = company.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  const score = 85 + (hash % 12);
+  const threatLevels = ["CRITICAL", "ELEVATED", "MODERATE", "WATCH"];
+  const threatIndex = threatLevels[hash % threatLevels.length];
+
+  const swot = {
+    S: [
+      `Proprietary ${category} architecture`,
+      `Rapid adoption in ${hash % 2 === 0 ? 'Enterprise' : 'SMB'} segments`,
+      `Unique positioning as a ${company}-centric ecosystem`
+    ],
+    W: [
+      `Scaling challenges in ${hash % 3 === 0 ? 'APAC' : 'EMEA'} markets`,
+      `Heavy R&D spend on ${category} optimization`,
+      `Complex onboarding for non-technical users`
+    ],
+    O: [
+      `Expansion into autonomous ${category} workflows`,
+      `Integration with emerging LLM frameworks`,
+      `Partnership potential with global ${hash % 2 === 0 ? 'cloud' : 'fintech'} providers`
+    ],
+    T: [
+      `Disruption from open-source ${category} alternatives`,
+      `Tightening data privacy regulations in the EU`,
+      `Aggressive talent poaching from tech giants`
+    ]
+  };
+
+  const competitors = [
+    { name: `${company} OpenSource`, threat: 40 + (hash % 30), marketShare: 10 + (hash % 10) },
+    { name: `Global ${category.split(' ')[0]}`, threat: 60 + (hash % 25), marketShare: 20 + (hash % 15) },
+    { name: "Legacy Player Inc.", threat: 30 + (hash % 40), marketShare: 30 + (hash % 20) },
+    { name: `Neo ${company}`, threat: 70 + (hash % 20), marketShare: 5 + (hash % 10) },
+  ];
+
+  const contacts = [
+    { name: `${String.fromCharCode(65 + (hash % 26))}lex Thompson`, role: `Head of ${category.split(' ')[0]}`, type: "Decision Maker" },
+    { name: `Jordan ${String.fromCharCode(65 + ((hash + 5) % 26))}mith`, role: "Chief Strategy Officer", type: "Influencer" },
+    { name: `Taylor Reed`, role: "VP Operations", type: "Economic Buyer" },
+  ];
+
+  return { score, threatIndex, swot, competitors, contacts };
 };
 
 const DRAFTS = {
-  Consultative: "Hi {name},\n\nI noticed {company} has been rapidly expanding its AI-driven fraud capabilities. Given your role as {role}, I thought you might be interested in how we've helped similar infrastructure providers reduce false positives by 40% without adding latency.\n\nOpen to a brief chat next Tuesday?",
-  Aggressive: "Hi {name},\n\n{company}'s current pricing structure is leaving enterprise revenue on the table. As {role}, you know that switching costs are high, but competitors are eating into your market share with aggressive API pricing.\n\nWe have a direct solution. Let's talk this week.",
-  Value: "Hi {name},\n\nI put together a custom threat matrix for {company} analyzing your positioning against Adyen and Checkout.com. As {role}, I think you'll find the embedded finance insights highly relevant.\n\nMind if I send the PDF over?"
+  Consultative: "Hi {name},\n\nI noticed {company} has been rapidly expanding its capabilities in {category}. Given your role as {role}, I thought you might be interested in how we've helped similar infrastructure providers reduce operational overhead by 40% using JC Intelligence systems.\n\nOpen to a brief chat next Tuesday?",
+  Aggressive: "Hi {name},\n\n{company}'s current market positioning in {category} is leaving revenue on the table. As {role}, you know that the threat from emerging competitors is reaching critical levels.\n\nWe have a direct strategy to reclaim your dominance. Let's talk this week.",
+  Value: "Hi {name},\n\nI put together a custom threat matrix for {company} analyzing your positioning in the {category} space. As {role}, I think you'll find these unique strategic insights highly relevant to your Q3 goals.\n\nMind if I send the PDF over?"
 };
 
 function ReportContent() {
   const searchParams = useSearchParams();
   const company = searchParams.get("company") || "Target Company";
+  const category = searchParams.get("category") || "General Industry";
   
-  const [activeContact, setActiveContact] = useState(MOCK_DATA.contacts[0]);
+  const reportData = useMemo(() => generateDynamicData(company, category), [company, category]);
+  
+  const [activeContact, setActiveContact] = useState(reportData.contacts[0]);
   const [tone, setTone] = useState<keyof typeof DRAFTS>("Consultative");
   const [copied, setCopied] = useState(false);
 
@@ -51,6 +78,7 @@ function ReportContent() {
     return DRAFTS[tone]
       .replace("{name}", activeContact.name.split(" ")[0])
       .replace("{company}", company)
+      .replace("{category}", category)
       .replace("{role}", activeContact.role);
   };
 
@@ -69,7 +97,7 @@ function ReportContent() {
             <CheckCircle2 size={14} /> Scan Complete
           </div>
           <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-2">{company}</h1>
-          <p className="text-xl text-white/60">Executive Intelligence Report</p>
+          <p className="text-xl text-white/60">{category} | Executive Intelligence Report</p>
         </div>
         <div className="flex gap-3">
           <button className="px-4 py-2 rounded-lg bg-surface border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-2 text-sm font-medium">
@@ -88,7 +116,7 @@ function ReportContent() {
             <div className="absolute -right-6 -top-6 w-32 h-32 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-colors"></div>
             <h3 className="text-sm text-white/50 uppercase tracking-wider font-bold mb-2">JC Intelligence Score</h3>
             <div className="flex items-end gap-3">
-              <span className="text-6xl font-heading font-bold text-gradient-primary">{MOCK_DATA.score}</span>
+              <span className="text-6xl font-heading font-bold text-gradient-primary">{reportData.score}</span>
               <span className="text-xl text-white/40 mb-1">/100</span>
             </div>
             <div className="mt-4 flex items-center gap-2 text-sm text-accent">
@@ -101,7 +129,7 @@ function ReportContent() {
             <h3 className="text-sm text-white/50 uppercase tracking-wider font-bold mb-2">Market Threat Index</h3>
             <div className="flex items-center gap-3">
               <ShieldAlert size={40} className="text-danger" />
-              <span className="text-4xl font-heading font-bold text-danger">{MOCK_DATA.threatIndex}</span>
+              <span className="text-4xl font-heading font-bold text-danger">{reportData.threatIndex}</span>
             </div>
             <div className="mt-4 text-sm text-white/60">
               High risk of disruption in next 12 months.
@@ -119,7 +147,7 @@ function ReportContent() {
               <div className="p-4 rounded-xl bg-surface border border-accent/20">
                 <h4 className="font-bold text-accent mb-2 flex items-center gap-2">Strengths</h4>
                 <ul className="space-y-2">
-                  {MOCK_DATA.swot.S.map((item, i) => (
+                  {reportData.swot.S.map((item, i) => (
                     <li key={i} className="text-sm text-white/70 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0"></span> {item}
                     </li>
@@ -129,7 +157,7 @@ function ReportContent() {
               <div className="p-4 rounded-xl bg-surface border border-primary/20">
                 <h4 className="font-bold text-primary mb-2 flex items-center gap-2">Opportunities</h4>
                 <ul className="space-y-2">
-                  {MOCK_DATA.swot.O.map((item, i) => (
+                  {reportData.swot.O.map((item, i) => (
                     <li key={i} className="text-sm text-white/70 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span> {item}
                     </li>
@@ -141,7 +169,7 @@ function ReportContent() {
               <div className="p-4 rounded-xl bg-surface border border-amber-500/20">
                 <h4 className="font-bold text-amber-500 mb-2 flex items-center gap-2">Weaknesses</h4>
                 <ul className="space-y-2">
-                  {MOCK_DATA.swot.W.map((item, i) => (
+                  {reportData.swot.W.map((item, i) => (
                     <li key={i} className="text-sm text-white/70 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></span> {item}
                     </li>
@@ -151,7 +179,7 @@ function ReportContent() {
               <div className="p-4 rounded-xl bg-surface border border-danger/20">
                 <h4 className="font-bold text-danger mb-2 flex items-center gap-2">Threats</h4>
                 <ul className="space-y-2">
-                  {MOCK_DATA.swot.T.map((item, i) => (
+                  {reportData.swot.T.map((item, i) => (
                     <li key={i} className="text-sm text-white/70 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-danger mt-1.5 shrink-0"></span> {item}
                     </li>
@@ -171,7 +199,7 @@ function ReportContent() {
           </h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={MOCK_DATA.competitors} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={reportData.competitors} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <XAxis type="number" domain={[0, 100]} stroke="#ffffff40" />
                 <YAxis dataKey="name" type="category" stroke="#ffffff80" />
                 <Tooltip 
@@ -179,7 +207,7 @@ function ReportContent() {
                   itemStyle={{ color: '#00F0FF' }}
                 />
                 <Bar dataKey="threat" radius={[0, 4, 4, 0]}>
-                  {MOCK_DATA.competitors.map((entry, index) => (
+                  {reportData.competitors.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.threat > 75 ? '#FF0055' : entry.threat > 65 ? '#9D00FF' : '#00F0FF'} />
                   ))}
                 </Bar>
@@ -211,7 +239,7 @@ function ReportContent() {
             {/* Contacts Sidebar */}
             <div className="w-1/3 border-r border-white/5 bg-surface/30 p-4 space-y-2 overflow-y-auto">
               <div className="text-xs text-white/40 font-bold uppercase tracking-wider mb-3 px-2">Decision Makers</div>
-              {MOCK_DATA.contacts.map((contact, idx) => (
+              {reportData.contacts.map((contact, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveContact(contact)}

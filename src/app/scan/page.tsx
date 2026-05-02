@@ -26,7 +26,7 @@ export default function ScanPage() {
     // Simulate API call to backend to initiate scan
     setTimeout(() => {
       // Navigate to dashboard
-      router.push(`/dashboard?company=${encodeURIComponent(company)}`);
+      router.push(`/dashboard?company=${encodeURIComponent(company)}&category=${encodeURIComponent(category)}`);
     }, 2000);
   };
 
