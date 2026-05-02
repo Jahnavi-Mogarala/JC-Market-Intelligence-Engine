@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Download, FileText, CheckCircle2, TrendingUp, AlertTriangle, 
-  ShieldAlert, Mail, Send, Copy, RefreshCw, Briefcase 
+  ShieldAlert, Mail, Send, Copy, RefreshCw, Briefcase, Loader2
 } from "lucide-react";
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell 
@@ -39,7 +39,7 @@ const DRAFTS = {
   Value: "Hi {name},\n\nI put together a custom threat matrix for {company} analyzing your positioning against Adyen and Checkout.com. As {role}, I think you'll find the embedded finance insights highly relevant.\n\nMind if I send the PDF over?"
 };
 
-export default function ReportPage() {
+function ReportContent() {
   const searchParams = useSearchParams();
   const company = searchParams.get("company") || "Target Company";
   
@@ -265,5 +265,13 @@ export default function ReportPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReportPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-6 max-w-7xl text-white text-center py-20"><Loader2 className="animate-spin inline mr-2" /> Generating Report...</div>}>
+      <ReportContent />
+    </Suspense>
   );
 }

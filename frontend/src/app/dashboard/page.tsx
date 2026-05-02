@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2, CircleDashed, Loader2, Cpu, Globe, Users, MessageSquare } from "lucide-react";
@@ -12,7 +12,7 @@ const AGENTS = [
   { id: "outreach", name: "JC Outreach Agent", icon: MessageSquare, description: "Drafting hyper-personalized communication..." },
 ];
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const company = searchParams.get("company") || "Target Company";
@@ -154,5 +154,13 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-6 max-w-5xl text-white text-center py-20"><Loader2 className="animate-spin inline mr-2" /> Loading Engine...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
