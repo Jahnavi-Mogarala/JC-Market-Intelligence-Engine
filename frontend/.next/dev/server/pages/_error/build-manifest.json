@@ -1,0 +1,22 @@
+{
+  "devFiles": [],
+  "ampDevFiles": [],
+  "polyfillFiles": [],
+  "lowPriorityFiles": [],
+  "rootMainFiles": [],
+  "pages": {
+    "/_error": [
+      "static/chunks/0.nf_next_dist_compiled_0~15cs3._.js",
+      "static/chunks/0.nf_next_dist_shared_lib_0fp2.70._.js",
+      "static/chunks/0.nf_next_dist_client_0x5e14r._.js",
+      "static/chunks/0.nf_next_dist_0~do-_k._.js",
+      "static/chunks/[next]_entry_page-loader_ts_0n8s_3n._.js",
+      "static/chunks/0.nf_react-dom_0ulfauj._.js",
+      "static/chunks/0.nf_0qfzygk._.js",
+      "static/chunks/[root-of-the-server]__0n8r0kb._.js",
+      "static/chunks/OneDrive_Documents_JC Hackstorm_frontend_pages__error_07xvfw~._.js",
+      "static/chunks/turbopack-OneDrive_Documents_JC Hackstorm_frontend_pages__error_0lq~s2a._.js"
+    ]
+  },
+  "ampFirstPages": []
+}
